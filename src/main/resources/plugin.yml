@@ -1,0 +1,8 @@
+name: Erlleteconomy
+version: ${project.version}
+main: dev.leandroerllet.erlleteconomy.Erlleteconomy
+api-version: 1.16
+depend: [Vault]
+authors: [LeandroErllet]
+description: a vault economy based plugin for minecraft servers
+website: craftlife.com.br

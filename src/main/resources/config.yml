@@ -1,0 +1,8 @@
+# the money limit to be sent without confirmation and alert
+limitwithoutalert: 5000
+
+database:
+  host: localhost:5432
+  database: database
+  username: root
+  password: password

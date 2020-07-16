@@ -21,69 +21,65 @@ public class EconomyCommand extends BaseCommand {
     @Default
     @Description("see your money or someone else's")
     @Subcommand("see")
-    @CommandCompletion("@players")
-    public static void seeMoney(Player player, @Optional OnlinePlayer onlinePlayer) {
-        if (onlinePlayer == null) {
+    @CommandCompletion("@players @nothing")
+    public static void seeMoney(Player player, @Optional String target) {
+        if (target == null) {
             String money = StringUtils.moneyFormat(Erlleteconomy.getEcon().getBalance(player));
             player.spigot().sendMessage(MineDown.parse(String.format("&2Your money: %s"
                     , money)));
             return;
         }
-        String money = StringUtils.moneyFormat(Erlleteconomy.getEcon().getBalance(onlinePlayer.getPlayer()));
-        Player target = onlinePlayer.getPlayer();
-        player.spigot().sendMessage(MineDown.parse(String.format("&2%s's money: %s", target.getName(), money)));
+        String money = StringUtils.moneyFormat(Erlleteconomy.getEcon().getBalance(target));
+        player.spigot().sendMessage(MineDown.parse(String.format("&2%s's money: %s", target, money)));
     }
 
     @Description("give money to a player")
     @Subcommand("give")
     @CommandPermission("money.give")
-    @CommandCompletion("@players")
-    public static void giveMoney(Player player, OnlinePlayer onlinePlayer, Integer value) {
+    @CommandCompletion("@players @nothing")
+    public static void giveMoney(Player player, String target, Integer value) {
         if (value <= 0) {
             player.spigot().sendMessage(MineDown.parse("&cthe value cannot be less than 0"));
             return;
         }
-        Player target = onlinePlayer.getPlayer();
         String money = StringUtils.moneyFormat(value);
         Erlleteconomy.getEcon().depositPlayer(target, value);
-        player.spigot().sendMessage(MineDown.parse(String.format("&ethe amount of %s was deposited in %s's account", money, target.getName())));
+        player.spigot().sendMessage(MineDown.parse(String.format("&ethe amount of %s was deposited in %s's account", money, target)));
     }
 
     @Description("take money of a player")
     @Subcommand("take")
     @CommandPermission("money.take")
-    @CommandCompletion("@players")
-    public static void takeMoney(Player player, OnlinePlayer onlinePlayer, Integer value) {
+    @CommandCompletion("@players @nothing")
+    public static void takeMoney(Player player, String target, Integer value) {
         if (value <= 0) {
             player.spigot().sendMessage(MineDown.parse("&cthe value cannot be less than 0"));
             return;
         }
-        Player target = onlinePlayer.getPlayer();
         String money = StringUtils.moneyFormat(value);
         Erlleteconomy.getEcon().withdrawPlayer(target, value);
-        player.spigot().sendMessage(MineDown.parse(String.format("&cthe value of %s was taken from %s's account", money, target.getName())));
+        player.spigot().sendMessage(MineDown.parse(String.format("&cthe value of %s was taken from %s's account", money, target)));
     }
 
     @Description("set money of a player")
     @Subcommand("set")
     @CommandPermission("money.set")
-    @CommandCompletion("@players")
-    public static void setMoney(Player player, OnlinePlayer onlinePlayer, Integer value) {
+    @CommandCompletion("@players @nothing")
+    public static void setMoney(Player player, String target, Integer value) {
         if (value < 0) {
             player.spigot().sendMessage(MineDown.parse("&cthe value cannot be less than 0"));
             return;
         }
-        Player target = onlinePlayer.getPlayer();
         String money = StringUtils.moneyFormat(value);
         double has = Erlleteconomy.getEcon().getBalance(target);
         Erlleteconomy.getEcon().withdrawPlayer(target, has);
         Erlleteconomy.getEcon().depositPlayer(target, value);
-        player.spigot().sendMessage(MineDown.parse(String.format("&ethe amount of %s was set in %s's account", money, target.getName())));
+        player.spigot().sendMessage(MineDown.parse(String.format("&ethe amount of %s was set in %s's account", money, target)));
     }
 
     @Description("pay money to a player")
     @Subcommand("pay")
-    @CommandCompletion("@players")
+    @CommandCompletion("@players @nothing")
     public static void payMoney(Player player, OnlinePlayer onlinePlayer, Integer value) {
         if (value <= 0) {
             player.spigot().sendMessage(MineDown.parse("&cthe value cannot be less than 0!"));
@@ -127,7 +123,7 @@ public class EconomyCommand extends BaseCommand {
 
     @Description("see The top 10 richest players on the server")
     @Subcommand("top")
-    @CommandCompletion("@players")
+    @CommandCompletion("@players @nothing")
     public static void topMoney(Player player) {
         try {
             Connection db = Erlleteconomy.getDb();

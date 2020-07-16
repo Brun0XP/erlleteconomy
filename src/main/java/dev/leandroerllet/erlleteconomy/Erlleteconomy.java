@@ -5,6 +5,7 @@ import dev.leandroerllet.erlleteconomy.command.ChatActionCommand;
 import dev.leandroerllet.erlleteconomy.command.EconomyCommand;
 import dev.leandroerllet.erlleteconomy.listener.CreateAccountListener;
 import dev.leandroerllet.erlleteconomy.model.CustomEconomy;
+import dev.leandroerllet.erlleteconomy.service.MoneyTopService;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.milkbowl.vault.economy.Economy;
@@ -58,6 +59,7 @@ public final class Erlleteconomy extends JavaPlugin {
         BukkitCommandManager manager = new BukkitCommandManager(this);
         manager.registerCommand(new EconomyCommand());
         manager.registerCommand(new ChatActionCommand());
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, MoneyTopService::load, 60 *20, 5 * 60 * 20);
     }
 
     @SneakyThrows

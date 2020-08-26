@@ -84,13 +84,13 @@ public class CustomEconomy implements Economy {
     }
 
     @Override
-    public boolean hasAccount(String string, String string1) {
-        return false;
+    public boolean hasAccount(String nick, String world) {
+        return hasAccount(nick);
     }
 
     @Override
-    public boolean hasAccount(OfflinePlayer op, String string) {
-        return false;
+    public boolean hasAccount(OfflinePlayer offlinePlayer, String world) {
+        return hasAccount(offlinePlayer);
     }
 
     @SneakyThrows
@@ -227,13 +227,13 @@ public class CustomEconomy implements Economy {
     }
 
     @Override
-    public boolean createPlayerAccount(String string, String string1) {
-        return false;
+    public boolean createPlayerAccount(String nick, String world) {
+        return createPlayerAccount(nick);
     }
 
     @Override
-    public boolean createPlayerAccount(OfflinePlayer op, String string) {
-        return false;
+    public boolean createPlayerAccount(OfflinePlayer offlinePlayer, String world) {
+        return createPlayerAccount(offlinePlayer);
     }
 
     @Override

@@ -15,13 +15,16 @@ import java.util.UUID;
 @CommandAlias("chataction")
 public class ChatActionCommand extends BaseCommand {
 
-    private static HashMap<UUID, Runnable> actions = new HashMap<>();
+    private static final HashMap<UUID, Runnable> actions = new HashMap<>();
 
     public static String createTempCommand(Runnable r, int expires) {
         final UUID uuid = UUID.randomUUID();
         actions.put(uuid, r);
         if (expires > 0) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(Erlleteconomy.getInstance(),() -> actions.remove(uuid), 60 * expires);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(
+                    Erlleteconomy.getInstance(),
+                    () -> actions.remove(uuid),
+                    20 * expires);
         }
         return "/chataction " + uuid.toString();
     }

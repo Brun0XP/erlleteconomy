@@ -108,10 +108,10 @@ public class EconomyCommand extends BaseCommand {
             sendMoney(player, value, target, money);
             BaseComponent[] alertMessage = MineDown.parse(String.format("&c[ALERT] %s deposited %s in %s's account", player.getName(), money, target.getName()));
             Bukkit.getOnlinePlayers().forEach(online -> online.spigot().sendMessage(alertMessage));
-        }, 5);
+        }, 20);
 
         player.spigot().sendMessage(MineDown.parse(String.format("&ayou are about to deposit %s in %s's account, click below to confirm", money, target.getName())));
-        player.spigot().sendMessage(MineDown.parse(String.format("[&6[I want to send %s to %s's account]](%s)", money, target.getName(), cmd)));
+        player.spigot().sendMessage(MineDown.parse(String.format("[&6[I want to send %s to %s's account]](RUN_COMMAND=%s HOVER=&eClick to send)", money, target.getName(), cmd)));
     }
 
     private static void sendMoney(Player player, Integer value, Player target, String money) {

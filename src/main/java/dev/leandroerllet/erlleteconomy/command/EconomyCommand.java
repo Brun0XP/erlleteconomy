@@ -126,7 +126,7 @@ public class EconomyCommand extends BaseCommand {
     @CommandCompletion("@players @nothing")
     public static void topMoney(Player player) {
         try {
-            Connection db = Erlleteconomy.getDb();
+            Connection db = Erlleteconomy.getConnection();
             Statement stmt;
             stmt = db.createStatement();
             stmt.execute("SELECT * FROM economy ORDER BY balance DESC limit 10;");

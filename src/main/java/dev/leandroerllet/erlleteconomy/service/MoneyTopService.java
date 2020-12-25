@@ -18,7 +18,7 @@ public class MoneyTopService {
 
     public static void load() {
         try {
-            Connection db = Erlleteconomy.getDb();
+            Connection db = Erlleteconomy.getConnection();
             Statement stmt;
             stmt = db.createStatement();
             stmt.execute("SELECT * FROM economy ORDER BY balance DESC limit 10;");

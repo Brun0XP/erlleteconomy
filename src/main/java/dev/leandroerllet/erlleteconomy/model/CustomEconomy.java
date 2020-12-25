@@ -10,10 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -60,160 +57,162 @@ public class CustomEconomy implements Economy {
 
     @SneakyThrows
     @Override
-    public boolean hasAccount(String nick) {
-        if (cache.contains(nick.toLowerCase())) {
+    public boolean hasAccount(String playerName) {
+        if (cache.contains(playerName.toLowerCase())) {
             return true;
         }
-        Connection db = Erlleteconomy.getDb();
-        Statement stmt;
-        stmt = db.createStatement();
-        stmt.execute(String.format("SELECT * FROM economy WHERE username = '%s'", nick.toLowerCase()));
-        ResultSet rs = stmt.getResultSet();
-        boolean b = rs.next();
-        rs.close();
-        stmt.close();
-        if (b) {
-            cache.add(nick.toLowerCase());
+        Connection connection = Erlleteconomy.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM economy WHERE username = ?;");
+        preparedStatement.setString(1, playerName.toLowerCase());
+        ResultSet resultSet = preparedStatement.executeQuery();
+        boolean hasAccount = resultSet.next();
+        resultSet.close();
+        preparedStatement.close();
+        if (hasAccount) {
+            cache.add(playerName.toLowerCase());
         }
-        return b;
+        return hasAccount;
     }
 
     @Override
-    public boolean hasAccount(OfflinePlayer op) {
-        return hasAccount(Objects.requireNonNull(op.getName()));
+    public boolean hasAccount(OfflinePlayer offlinePlayer) {
+        return hasAccount(Objects.requireNonNull(offlinePlayer.getName()));
     }
 
     @Override
-    public boolean hasAccount(String nick, String world) {
-        return hasAccount(nick);
+    public boolean hasAccount(String playerName, String worldName) {
+        return hasAccount(playerName);
     }
 
     @Override
-    public boolean hasAccount(OfflinePlayer offlinePlayer, String world) {
+    public boolean hasAccount(OfflinePlayer offlinePlayer, String worldName) {
         return hasAccount(offlinePlayer);
     }
 
     @SneakyThrows
     @Override
-    public double getBalance(String nick) {
-        Connection db = Erlleteconomy.getDb();
-        Statement stmt;
-        stmt = db.createStatement();
-        stmt.execute(String.format("SELECT * FROM economy WHERE username = '%s'", nick.toLowerCase()));
-        ResultSet rs = stmt.getResultSet();
-        double b = rs.next() ? rs.getDouble("balance") : 0.00;
-        rs.close();
-        stmt.close();
-        return b;
+    public double getBalance(String playerName) {
+        Connection connection = Erlleteconomy.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM economy WHERE username = ?;");
+        preparedStatement.setString(1, playerName.toLowerCase());
+        ResultSet resultSet = preparedStatement.executeQuery();
+        double balance = resultSet.next() ? resultSet.getDouble("balance") : 0.00;
+        resultSet.close();
+        preparedStatement.close();
+        return balance;
     }
 
     @Override
-    public double getBalance(OfflinePlayer op) {
-        return getBalance(Objects.requireNonNull(op.getName()));
+    public double getBalance(OfflinePlayer offlinePlayer) {
+        return getBalance(Objects.requireNonNull(offlinePlayer.getName()));
     }
 
     @Override
-    public double getBalance(String nick, String string1) {
-        return getBalance(nick);
+    public double getBalance(String playerName, String worldName) {
+        return getBalance(playerName);
     }
 
     @Override
-    public double getBalance(OfflinePlayer op, String string) {
-        return getBalance(Objects.requireNonNull(op.getName()));
+    public double getBalance(OfflinePlayer offlinePlayer, String worldName) {
+        return getBalance(Objects.requireNonNull(offlinePlayer.getName()));
     }
 
     @Override
-    public boolean has(String nick, double d) {
-        return getBalance(nick) >= d;
+    public boolean has(String playerName, double balance) {
+        return getBalance(playerName) >= balance;
     }
 
     @Override
-    public boolean has(OfflinePlayer op, double d) {
-        return has(op.getName(), d);
+    public boolean has(OfflinePlayer offlinePlayer, double balance) {
+        return has(offlinePlayer.getName(), balance);
     }
 
     @Override
-    public boolean has(String nick, String string1, double quantia) {
-        return has(nick, quantia);
+    public boolean has(String playerName, String worldName, double balance) {
+        return has(playerName, balance);
     }
 
     @Override
-    public boolean has(OfflinePlayer op, String string, double d) {
-        return has(op.getName(), d);
-    }
-
-    @SneakyThrows
-    @Override
-    public EconomyResponse withdrawPlayer(String nick, double d) {
-        if (!hasAccount(nick)) {
-            createPlayerAccount(nick);
-        }
-        if (!has(nick, d)) {
-            return new EconomyResponse(0, d, EconomyResponse.ResponseType.FAILURE, "");
-        }
-        Connection db = Erlleteconomy.getDb();
-        Statement stmt;
-        stmt = db.createStatement();
-        stmt.executeUpdate(String.format("UPDATE economy SET balance=balance-%s WHERE username = '%s';", d, nick.toLowerCase()));
-        stmt.close();
-        return new EconomyResponse(d, getBalance(nick) - d, EconomyResponse.ResponseType.SUCCESS, "");
-    }
-
-    @Override
-    public EconomyResponse withdrawPlayer(OfflinePlayer op, double d) {
-        return withdrawPlayer(op.getName(), d);
-    }
-
-    @Override
-    public EconomyResponse withdrawPlayer(String nick, String string1, double d) {
-        return withdrawPlayer(nick, d);
-    }
-
-    @Override
-    public EconomyResponse withdrawPlayer(OfflinePlayer op, String string, double d) {
-        return withdrawPlayer(op.getName(), d);
+    public boolean has(OfflinePlayer offlinePlayer, String worldName, double balance) {
+        return has(offlinePlayer.getName(), balance);
     }
 
     @SneakyThrows
     @Override
-    public EconomyResponse depositPlayer(String nick, double d) {
-        Connection db = Erlleteconomy.getDb();
-        Statement stmt;
-        stmt = db.createStatement();
-        stmt.executeUpdate(String.format("UPDATE economy SET balance=balance+%s WHERE username = '%s';", d, nick.toLowerCase()));
-        stmt.close();
-        return new EconomyResponse(d, getBalance(nick) + d, EconomyResponse.ResponseType.SUCCESS, "");
+    public EconomyResponse withdrawPlayer(String playerName, double balance) {
+        if (!hasAccount(playerName)) {
+            createPlayerAccount(playerName);
+        }
+        if (!has(playerName, balance)) {
+            return new EconomyResponse(0, balance, EconomyResponse.ResponseType.FAILURE, "");
+        }
+        Connection connection = Erlleteconomy.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement("UPDATE economy SET balance=balance-? WHERE username = ?;");
+        preparedStatement.setDouble(1, balance);
+        preparedStatement.setString(2, playerName.toLowerCase());
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+        return new EconomyResponse(balance, getBalance(playerName) - balance, EconomyResponse.ResponseType.SUCCESS, "");
     }
 
     @Override
-    public EconomyResponse depositPlayer(OfflinePlayer op, double d) {
-        return depositPlayer(Objects.requireNonNull(op.getName()), d);
+    public EconomyResponse withdrawPlayer(OfflinePlayer offlinePlayer, double balance) {
+        return withdrawPlayer(offlinePlayer.getName(), balance);
     }
 
     @Override
-    public EconomyResponse depositPlayer(String nick, String string1, double d) {
-        return depositPlayer(nick, d);
+    public EconomyResponse withdrawPlayer(String playerName, String worldName, double balance) {
+        return withdrawPlayer(playerName, balance);
     }
 
     @Override
-    public EconomyResponse depositPlayer(OfflinePlayer op, String string, double d) {
-        return depositPlayer(Objects.requireNonNull(op.getName()), d);
+    public EconomyResponse withdrawPlayer(OfflinePlayer offlinePlayer, String worldName, double balance) {
+        return withdrawPlayer(offlinePlayer.getName(), balance);
+    }
+
+    @SneakyThrows
+    @Override
+    public EconomyResponse depositPlayer(String playerName, double balance) {
+        Connection connection = Erlleteconomy.getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement("UPDATE economy SET balance=balance+? WHERE username = ?;");
+        preparedStatement.setDouble(1, balance);
+        preparedStatement.setString(2, playerName.toLowerCase());
+        preparedStatement.executeUpdate();
+
+        preparedStatement.close();
+        return new EconomyResponse(balance, getBalance(playerName), EconomyResponse.ResponseType.SUCCESS, "");
+    }
+
+    @Override
+    public EconomyResponse depositPlayer(OfflinePlayer offlinePlayer, double balance) {
+        return depositPlayer(Objects.requireNonNull(offlinePlayer.getName()), balance);
+    }
+
+    @Override
+    public EconomyResponse depositPlayer(String playerName, String worldName, double balance) {
+        return depositPlayer(playerName, balance);
+    }
+
+    @Override
+    public EconomyResponse depositPlayer(OfflinePlayer offlinePlayer, String worldName, double balance) {
+        return depositPlayer(Objects.requireNonNull(offlinePlayer.getName()), balance);
     }
 
 
     @Override
-    public boolean createPlayerAccount(String nick) {
-        if (!hasAccount(nick)) {
-            Optional<Player> optionalPlayer = Optional.ofNullable(Bukkit.getPlayer(nick));
+    public boolean createPlayerAccount(String playerName) {
+        if (!hasAccount(playerName)) {
+            Optional<Player> optionalPlayer = Optional.ofNullable(Bukkit.getPlayer(playerName));
             optionalPlayer.ifPresent(player -> {
-                Connection db = Erlleteconomy.getDb();
-                Statement stmt;
+                Connection connection = Erlleteconomy.getConnection();
                 try {
-                    stmt = db.createStatement();
-                    stmt.executeUpdate(String.format("INSERT INTO economy (username, balance) VALUES('%s', %s);", player.getName().toLowerCase(), 0));
-                    stmt.close();
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
+                    PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO economy (username, balance) VALUES(?, ?);");
+                    preparedStatement.setString(1, playerName.toLowerCase());
+                    preparedStatement.setDouble(2, 0);
+                    preparedStatement.executeUpdate();
+                    preparedStatement.close();
+                } catch (SQLException throwable) {
+                    throwable.printStackTrace();
                 }
 
             });
@@ -222,17 +221,17 @@ public class CustomEconomy implements Economy {
     }
 
     @Override
-    public boolean createPlayerAccount(OfflinePlayer op) {
-        return createPlayerAccount(op.getName());
+    public boolean createPlayerAccount(OfflinePlayer offlinePlayer) {
+        return createPlayerAccount(offlinePlayer.getName());
     }
 
     @Override
-    public boolean createPlayerAccount(String nick, String world) {
-        return createPlayerAccount(nick);
+    public boolean createPlayerAccount(String playerName, String worldName) {
+        return createPlayerAccount(playerName);
     }
 
     @Override
-    public boolean createPlayerAccount(OfflinePlayer offlinePlayer, String world) {
+    public boolean createPlayerAccount(OfflinePlayer offlinePlayer, String worldName) {
         return createPlayerAccount(offlinePlayer);
     }
 

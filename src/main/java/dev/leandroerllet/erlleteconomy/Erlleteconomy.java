@@ -23,7 +23,7 @@ public final class Erlleteconomy extends JavaPlugin {
 
 
     @Getter
-    private static Connection db;
+    private static Connection connection;
 
     @Getter
     private static Erlleteconomy instance;
@@ -43,12 +43,12 @@ public final class Erlleteconomy extends JavaPlugin {
 
         Statement stmt;
         Class.forName("org.postgresql.Driver");
-        db = DriverManager
+        connection = DriverManager
                 .getConnection(Objects.requireNonNull(instance.getConfig().getString("database.host"))
                         , instance.getConfig().getString("database.username")
                         , instance.getConfig().getString("database.password"));
 
-        stmt = db.createStatement();
+        stmt = connection.createStatement();
         stmt.execute("CREATE TABLE IF NOT EXISTS economy ( username varchar(16) NOT NULL,  balance int  NOT NULL,  PRIMARY KEY (username))");
         stmt.close();
     }
@@ -65,7 +65,7 @@ public final class Erlleteconomy extends JavaPlugin {
     @SneakyThrows
     @Override
     public void onDisable() {
-       db.close();
+       connection.close();
     }
 
 

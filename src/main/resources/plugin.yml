@@ -1,7 +1,7 @@
 name: Erlleteconomy
 version: ${project.version}
 main: dev.leandroerllet.erlleteconomy.Erlleteconomy
-api-version: 1.16
+api-version: 1.13
 depend: [Vault]
 authors: [LeandroErllet]
 description: a vault economy based plugin for minecraft servers
